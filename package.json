@@ -10,8 +10,8 @@
     "start": "electron build",
     "build:start": "npm run lint:build && npm start --",
     "test": "echo \"Error: no test specified\" && exit 1",
-    "package:linux": "npm run lint:build && cd build && npm run make --targets @electron-forge/maker-zip --platform linux .",
-    "package:win32": "npm run lint:build && cd build && npm run make --targets @electron-forge/maker-zip --platform win32 ."
+    "package:linux": "npm run lint:build && cd build && npm run make -- --platform linux",
+    "package:win32": "npm run lint:build && cd build && npm run make -- --platform win32"
   },
   "keywords": [],
   "author": "",
