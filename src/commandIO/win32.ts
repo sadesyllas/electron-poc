@@ -2,8 +2,8 @@ import { createInterface } from 'node:readline';
 import * as net from 'net';
 
 export const setupStreams = (
-  pipeNameIn: string,
-  pipeNameOut: string,
+  server: string,
+  _: string | undefined,
   callbacks: {
     input: (input: string) => Promise<string>;
     close?: () => void;
@@ -11,42 +11,41 @@ export const setupStreams = (
     error?: (error: Error) => void;
   }
 ) => {
-  const server = net.createServer(function (stream) {
-    stream.on(
-      'error',
-      callbacks.error ??
-        (() => {
-          // ignore
-        })
-    );
+  const stream = net.connect(server);
 
-    stream.on(
-      'end',
-      callbacks.end ??
-        (() => {
-          // ignore
-        })
-    );
-    stream.on(
-      'close',
-      callbacks.close ??
-        (() => {
-          // ignore
-        })
-    );
+  stream.on(
+    'error',
+    callbacks.error ??
+      (() => {
+        // ignore
+      })
+  );
 
-    const rl = createInterface({
-      input: stream,
-      terminal: false,
-    });
+  stream.on(
+    'end',
+    callbacks.end ??
+      (() => {
+        // ignore
+      })
+  );
 
-    rl.on('line', async (line) => {
-      const response = await callbacks.input(line);
-      stream.write(`${response}\n`);
-    });
+  stream.on(
+    'close',
+    callbacks.close ??
+      (() => {
+        // ignore
+      })
+  );
+
+  const rl = createInterface({
+    input: stream,
+    terminal: false,
   });
 
-  server.listen(pipeNameIn);
+  rl.on('line', async (line) => {
+    const response = await callbacks.input(line);
+    stream.write(`${response}\n`);
+  });
 
-  return () => server.close();
+  return () => stream.end();
 };

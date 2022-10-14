@@ -52,20 +52,33 @@ const wireUpApp = () => {
 };
 
 (async () => {
-  const argv = await yargs(hideBin(process.argv))
-    .option('in', {
-      requiresArg: true,
-      type: 'string',
-      demandOption: true,
-    })
-    .option('out', {
-      requiresArg: true,
-      type: 'string',
-      demandOption: true,
-    })
-    .help('h').argv;
+  let parser = yargs(hideBin(process.argv)).help('h');
 
-  streamsCloser = setupStreams(argv.in, argv.out, {
+  if (process.platform === 'win32') {
+    parser = parser.option('server', {
+      requiresArg: true,
+      type: 'string',
+      demandOption: true,
+    });
+  } else {
+    parser = parser
+      .option('in', {
+        requiresArg: true,
+        type: 'string',
+        demandOption: true,
+      })
+      .option('out', {
+        requiresArg: true,
+        type: 'string',
+        demandOption: true,
+      });
+  }
+
+  const argv = await parser.argv;
+
+  // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+  // @ts-ignore
+  streamsCloser = setupStreams(argv.in ?? argv.server, undefined, {
     input: (input) => {
       win?.webContents.send('input', input);
       return Promise.resolve(input);

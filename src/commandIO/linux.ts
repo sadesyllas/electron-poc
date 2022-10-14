@@ -3,7 +3,7 @@ import { createInterface } from 'node:readline';
 
 export const setupStreams = (
   pipeNameIn: string,
-  pipeNameOut: string,
+  pipeNameOut: string | undefined,
   callbacks: {
     input: (input: string) => Promise<string>;
     close?: () => void;
@@ -11,6 +11,10 @@ export const setupStreams = (
     error?: (error: Error) => void;
   }
 ) => {
+  if (pipeNameOut === undefined) {
+    throw new Error(`${pipeNameOut} must not be undefined in linux`);
+  }
+
   if (!fs.statSync(pipeNameIn, { throwIfNoEntry: false })?.isFIFO()) {
     throw new Error(`${pipeNameIn} is not a named pipe`);
   }
