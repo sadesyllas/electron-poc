@@ -6,7 +6,7 @@
   "scripts": {
     "start": "electron-forge start",
     "package": "electron-forge package",
-    "make": "electron-forge make --targets @electron-forge/maker-zip"
+    "make": "electron-forge make --targets @electron-forge/maker-zip ."
   },
   "keywords": [],
   "author": "",
@@ -20,7 +20,8 @@
     "electron": "^21.1.1"
   },
   "dependencies": {
-    "electron-squirrel-startup": "^1.0.0"
+    "electron-squirrel-startup": "^1.0.0",
+    "yargs": "^17.6.0"
   },
   "config": {
     "forge": {

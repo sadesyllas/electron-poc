@@ -12,7 +12,7 @@ export const setupStreams = (
   }
 ) => {
   if (pipeNameOut === undefined) {
-    throw new Error(`${pipeNameOut} must not be undefined in linux`);
+    throw new Error(`pipeNameOut must not be undefined in linux`);
   }
 
   if (!fs.statSync(pipeNameIn, { throwIfNoEntry: false })?.isFIFO()) {

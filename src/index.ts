@@ -76,16 +76,24 @@ const wireUpApp = () => {
 
   const argv = await parser.argv;
 
+  const sendToRenderer = (event: string, args?: unknown) => {
+    try {
+      win?.webContents.send(event, args);
+    } catch (_) {
+      // ignore
+    }
+  };
+
   // eslint-disable-next-line @typescript-eslint/ban-ts-comment
   // @ts-ignore
-  streamsCloser = setupStreams(argv.in ?? argv.server, undefined, {
+  streamsCloser = setupStreams(argv.in ?? argv.server, argv.out, {
     input: (input) => {
       win?.webContents.send('input', input);
       return Promise.resolve(input);
     },
-    end: () => (win?.webContents.isDestroyed() ? null : win?.webContents.send('io.end')),
-    close: () => (win?.webContents.isDestroyed() ? null : win?.webContents.send('io.close')),
-    error: (error: Error) => (win?.webContents.isDestroyed() ? null : win?.webContents.send('io.error', error)),
+    end: () => sendToRenderer('io.end'),
+    close: () => sendToRenderer('io.close'),
+    error: (error: Error) => sendToRenderer('io.error', error),
   });
 
   wireUpApp();
