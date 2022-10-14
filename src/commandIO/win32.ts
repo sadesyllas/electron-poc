@@ -11,52 +11,42 @@ export const setupStreams = (
     error?: (error: Error) => void;
   }
 ) => {
-  let streamIn: net.Socket;
-  const streamOut = net.connect(pipeNameOut);
-
   const server = net.createServer(function (stream) {
-    streamIn = stream;
+    stream.on(
+      'error',
+      callbacks.error ??
+        (() => {
+          // ignore
+        })
+    );
 
-    for (const stream of [streamIn, streamOut]) {
-      stream.on(
-        'error',
-        callbacks.error ??
-          (() => {
-            // ignore
-          })
-      );
-
-      stream.on(
-        'end',
-        callbacks.end ??
-          (() => {
-            // ignore
-          })
-      );
-      stream.on(
-        'close',
-        callbacks.close ??
-          (() => {
-            // ignore
-          })
-      );
-    }
+    stream.on(
+      'end',
+      callbacks.end ??
+        (() => {
+          // ignore
+        })
+    );
+    stream.on(
+      'close',
+      callbacks.close ??
+        (() => {
+          // ignore
+        })
+    );
 
     const rl = createInterface({
-      input: streamIn,
+      input: stream,
       terminal: false,
     });
 
     rl.on('line', async (line) => {
       const response = await callbacks.input(line);
-      streamOut.write(`${response}\n`);
+      stream.write(`${response}\n`);
     });
   });
 
   server.listen(pipeNameIn);
 
-  return () => {
-    server.close();
-    streamOut && streamOut.destroy();
-  };
+  return () => server.close();
 };
