@@ -12,15 +12,14 @@
     $pipeWriter.AutoFlush = $true
 
     while ($true) {
-        $what = Read-Host "What"
-        "Asking $what"
-        $pipeWriter.WriteLine($What)
+        $what = Read-Host "Send"
+        $pipeWriter.WriteLine($what)
         $ans = $pipeReader.ReadLine()
-        "The answer is $ans"
+        "Received: $ans"
     }
 }
 catch {
-    $_
+#    $_
 }
 finally
 {
