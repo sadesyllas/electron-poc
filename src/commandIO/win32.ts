@@ -1,5 +1,5 @@
+import net from 'node:net';
 import { createInterface } from 'node:readline';
-import * as net from 'net';
 
 export const setupStreams = (
   server: string,
@@ -13,13 +13,7 @@ export const setupStreams = (
   after: (err: Error | undefined, cb: (() => void) | undefined) => void
 ): void => {
   const stream = net.connect(server, () => {
-    stream.on(
-      'error',
-      callbacks.error ??
-        (() => {
-          // ignore
-        })
-    );
+    stream.on('error', callbacks.error ?? ((err) => after(err, undefined)));
 
     stream.on(
       'end',
