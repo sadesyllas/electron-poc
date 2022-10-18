@@ -74,8 +74,8 @@ const setupPipe = async (
 
         const stream =
           mode === fs.constants.O_RDONLY
-            ? fs.createReadStream('', { fd, autoClose: false, encoding: 'utf8' })
-            : fs.createWriteStream('', { fd, autoClose: false, encoding: 'utf8' });
+            ? fs.createReadStream('', { fd, encoding: 'utf8' })
+            : fs.createWriteStream('', { fd, encoding: 'utf8' });
 
         stream.on(
           'error',
