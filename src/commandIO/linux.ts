@@ -54,16 +54,19 @@ const setupPipe = async (
   new Promise((resolve, reject) => {
     fs.stat(pipeName, (err, stats) => {
       if (err) {
-        return reject(err);
+        reject(err);
+        return;
       }
 
       if (!stats.isFIFO()) {
-        return reject(new Error(`${pipeName} is not a named pipe`));
+        reject(new Error(`${pipeName} is not a named pipe`));
+        return;
       }
 
       fs.open(pipeName, mode, (err, fd) => {
         if (err) {
-          return reject(err);
+          reject(err);
+          return;
         }
 
         const stream =
@@ -86,6 +89,7 @@ const setupPipe = async (
               // ignore
             })
         );
+
         stream.on(
           'close',
           callbacks.close ??

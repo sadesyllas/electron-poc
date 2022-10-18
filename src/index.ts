@@ -1,4 +1,4 @@
-import { app, BrowserWindow } from 'electron';
+import { app, BrowserWindow, session } from 'electron';
 import * as path from 'path';
 import yargs from 'yargs';
 import { hideBin } from 'yargs/helpers';
@@ -32,6 +32,15 @@ const wireUpApp = () => {
         createWindow();
       }
     });
+
+    session.defaultSession.webRequest.onHeadersReceived((details, callback) =>
+      callback({
+        responseHeaders: {
+          ...details.responseHeaders,
+          'Content-Security-Policy': ["script-src 'self'"],
+        },
+      })
+    );
   });
 
   app.on('window-all-closed', () => {
