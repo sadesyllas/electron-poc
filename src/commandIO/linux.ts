@@ -21,15 +21,18 @@ export const setupStreams = (
     setupPipe(pipeNameIn, fs.constants.O_RDONLY, callbacks),
     setupPipe(pipeNameOut, fs.constants.O_WRONLY, callbacks),
   ]).then(
-    ([streamIn, streamOut]) => {
+    ([sIn, sOut]) => {
+      const streamIn = <fs.ReadStream>sIn;
+      const streamOut = <fs.WriteStream>sOut;
+
       const rl = createInterface({
-        input: <fs.ReadStream>streamIn,
+        input: streamIn,
         terminal: false,
       });
 
       rl.on('line', async (line) => {
         const response = await callbacks.input(line);
-        (<fs.WriteStream>streamOut).write(`${response}\n`);
+        streamOut.write(`${response}\n`);
       });
 
       after(undefined, () => {
