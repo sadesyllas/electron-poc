@@ -5,7 +5,7 @@ import { hideBin } from 'yargs/helpers';
 import { getStreamsSetupFunction } from './commandIO';
 
 const setupStreams = getStreamsSetupFunction();
-let streamsCloser: () => void;
+let streamsCloser: (() => void) | undefined;
 
 let win: BrowserWindow;
 
@@ -84,17 +84,28 @@ const wireUpApp = () => {
     }
   };
 
-  // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-  // @ts-ignore
-  streamsCloser = setupStreams(argv.in ?? argv.server, argv.out, {
-    input: (input) => {
-      win?.webContents.send('input', input);
-      return Promise.resolve(input);
-    },
-    end: () => sendToRenderer('io.end'),
-    close: () => sendToRenderer('io.close'),
-    error: (error: Error) => sendToRenderer('io.error', error),
-  });
-
   wireUpApp();
+
+  setupStreams(
+    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+    // @ts-ignore
+    argv.in ?? argv.server,
+    argv.out,
+    {
+      input: (input) => {
+        win?.webContents.send('input', input);
+        return Promise.resolve(input);
+      },
+      end: () => sendToRenderer('io.end'),
+      close: () => sendToRenderer('io.close'),
+      error: (error: Error) => sendToRenderer('io.error', error),
+    },
+    (err, cb) => {
+      if (err) {
+        throw err;
+      }
+
+      streamsCloser = cb;
+    }
+  );
 })();

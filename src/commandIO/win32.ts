@@ -9,43 +9,44 @@ export const setupStreams = (
     close?: () => void;
     end?: () => void;
     error?: (error: Error) => void;
-  }
-) => {
-  const stream = net.connect(server);
+  },
+  after: (err: Error | undefined, cb: (() => void) | undefined) => void
+): void => {
+  const stream = net.connect(server, () => {
+    stream.on(
+      'error',
+      callbacks.error ??
+        (() => {
+          // ignore
+        })
+    );
 
-  stream.on(
-    'error',
-    callbacks.error ??
-      (() => {
-        // ignore
-      })
-  );
+    stream.on(
+      'end',
+      callbacks.end ??
+        (() => {
+          // ignore
+        })
+    );
 
-  stream.on(
-    'end',
-    callbacks.end ??
-      (() => {
-        // ignore
-      })
-  );
+    stream.on(
+      'close',
+      callbacks.close ??
+        (() => {
+          // ignore
+        })
+    );
 
-  stream.on(
-    'close',
-    callbacks.close ??
-      (() => {
-        // ignore
-      })
-  );
+    const rl = createInterface({
+      input: stream,
+      terminal: false,
+    });
 
-  const rl = createInterface({
-    input: stream,
-    terminal: false,
+    rl.on('line', async (line) => {
+      const response = await callbacks.input(line);
+      stream.write(`${response}\n`);
+    });
+
+    after(undefined, () => stream.end());
   });
-
-  rl.on('line', async (line) => {
-    const response = await callbacks.input(line);
-    stream.write(`${response}\n`);
-  });
-
-  return () => stream.end();
 };
