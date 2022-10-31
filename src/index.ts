@@ -15,6 +15,9 @@ const createWindow = (windowProps: InitWindowProps) => {
   win = new BrowserWindow({
     width: 800,
     height: 600,
+    x: windowProps.y === undefined ? undefined : windowProps.x,
+    y: windowProps.x === undefined ? undefined : windowProps.y,
+    center: windowProps.center,
     webPreferences: {
       preload: path.join(__dirname, 'preload.js'),
     },
@@ -96,22 +99,36 @@ const wireUpApp = (windowProps: InitWindowProps) => {
       type: 'string',
       demandOption: true,
     })
-    .option('no-frame', { requiresArg: false })
-    .option('no-title', { requiresArg: false })
-    .option('no-maximizable', { requiresArg: false })
-    .option('no-minimizable', { requiresArg: false })
-    .option('no-movable', { requiresArg: false, description: 'This does not work in Linux' })
-    .option('maximize', { requiresArg: false })
-    .option('minimize', { requiresArg: false })
-    .option('transparent', { requiresArg: false })
-    .option('always-on-top', { requiresArg: false })
-    .option('click-through', { requiresArg: false })
-    .option('focus', { requiresArg: false })
+    .option('no-frame', { requiresArg: false, description: 'Do not create the window frame' })
+    .option('no-title', { requiresArg: false, description: 'Do not display the window title' })
+    .option('no-maximizable', { requiresArg: false, description: 'Do not allow the window to be maximized' })
+    .option('no-minimizable', { requiresArg: false, description: 'Do not allow the window to be minimized' })
+    .option('no-movable', {
+      requiresArg: false,
+      description: 'Do not allow the window to be moved (this does not work in Linux)',
+    })
+    .option('maximize', { requiresArg: false, description: 'Create the window in maximized form' })
+    .option('minimize', { requiresArg: false, description: 'Create the window in minimized form' })
+    .option('transparent', { requiresArg: false, description: 'Create a transparent window' })
+    .option('always-on-top', { requiresArg: false, description: 'Set the window to be always on top' })
+    .option('click-through', { requiresArg: false, description: 'Set the window to ignore mouse events' })
+    .option('focus', { requiresArg: false, description: 'Focus the window on start' })
     .option('opacity', {
       requiresArg: true,
       type: 'number',
-      coerce: (input) => Math.max(Math.min(input, 100.0), 0.0),
-      description: 'This does not work in Linux',
+      coerce: (input) => Math.max(Math.min(input, 1.0), 0.0),
+      description: 'Set the window opacity in the inclusive range of [0.0, 1.0] (this does not work in Linux)',
+    })
+    .option('center', { requiresArg: false, description: 'Create the window in the center of the screen' })
+    .option('x', {
+      requiresArg: true,
+      type: 'number',
+      description: 'Set the X screen coordinate for the window (--y must also be set to be used)',
+    })
+    .option('y', {
+      requiresArg: true,
+      type: 'number',
+      description: 'Set the Y screen coordinate for the window (--x must also be set to be used)',
     })
     .parserConfiguration({
       'boolean-negation': false,
@@ -160,6 +177,9 @@ const wireUpApp = (windowProps: InitWindowProps) => {
     alwaysOnTop: !!argv['always-on-top'],
     clickThrough: !!argv['click-through'],
     opacity: argv['opacity'],
+    x: argv['x'],
+    y: argv['y'],
+    center: !!argv['center'],
     focusOnStart: !!argv['focus'],
   });
 
@@ -170,8 +190,12 @@ const wireUpApp = (windowProps: InitWindowProps) => {
     argv.out,
     {
       input: (input) => {
-        const result = processCommand(input, { window: win });
-        win?.webContents.send('input', result);
+        const result = processCommand(input, { window: win, exit: () => app.exit() });
+        try {
+          win?.webContents.send('input', result);
+        } catch {
+          // ignore
+        }
         return Promise.resolve(result);
       },
       end: () => sendToRenderer('io.end'),

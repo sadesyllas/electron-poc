@@ -13,6 +13,9 @@ export interface InitWindowProps {
   alwaysOnTop: boolean;
   clickThrough: boolean;
   opacity: number | undefined;
+  x: number | undefined;
+  y: number | undefined;
+  center: boolean;
   focusOnStart: boolean;
 }
 
@@ -28,31 +31,27 @@ export interface CommandWindowProps {
   clickThrough?: boolean;
   opacity?: number;
   focus?: boolean;
+  x?: number;
+  y?: number;
+  animate?: boolean;
+  center?: boolean;
 }
 
 export interface Command {
-  type: CommandType;
+  name: CommandName;
   args?: CommandWindowProps;
 }
 
 export interface CommandContext {
   window: BrowserWindow;
+  exit: () => void;
 }
 
 export interface Event {
-  type: EventType;
+  name: EventName;
   args?: unknown;
 }
 
-export enum CommandType {
-  GetWindowProps = 1,
-  SetWindowProps = 2,
-}
+export type CommandName = 'getWindowProps' | 'setWindowProps' | 'exit';
 
-export enum EventType {
-  Ok = 1,
-  Info = 2,
-  Error = 3,
-  InvalidCommand = 4,
-  WindowProps = 5,
-}
+export type EventName = 'ok' | 'info' | 'error' | 'error.command.invalid' | 'window.props' | 'exit';

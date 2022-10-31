@@ -82,18 +82,25 @@ Options:
       --version         Show version number                            [boolean]
   -h                    Show help                                      [boolean]
       --title                                                [string] [required]
-      --no-frame
-      --no-title
-      --no-maximizable
-      --no-minimizable
-      --no-movable      This does not work in Linux
-      --maximize
-      --minimize
-      --transparent
-      --always-on-top
-      --click-through
-      --focus
-      --opacity         This does not work in Linux                     [number]
+      --no-frame        Do not create the window frame
+      --no-title        Do not display the window title
+      --no-maximizable  Do not allow the window to be maximized
+      --no-minimizable  Do not allow the window to be minimized
+      --no-movable      Do not allow the window to be moved (this does not work
+                        in Linux)
+      --maximize        Create the window in maximized form
+      --minimize        Create the window in minimized form
+      --transparent     Create a transparent window
+      --always-on-top   Set the window to be always on top
+      --click-through   Set the window to ignore mouse events
+      --focus           Focus the window on start
+      --opacity         Set the window opacity in the inclusive range of [0.0,
+                        1.0] (this does not work in Linux)              [number]
+      --center          Create the window in the center of the screen
+  -x                    Set the X screen coordinate for the window (--y must
+                        also be set to be used)                         [number]
+  -y                    Set the Y screen coordinate for the window (--x must
+                        also be set to be used)                         [number]
       --in                                                   [string] [required]
       --out                                                  [string] [required]
 ```
@@ -104,18 +111,15 @@ The application accepts commands of the form:
 
 ```json
 {
-  "type": 1,
+  "name": "command name",
   "args": {}
 }
 ```
 
-where `type` is defined as an enum:
+where `name` is defined as a type union:
 
 ```typescript
-export enum CommandType {
-  GetWindowProps = 1,
-  SetWindowProps = 2,
-}
+export type CommandName = 'getWindowProps' | 'setWindowProps' | 'exit';
 ```
 
 For example, to set window properties, the following command may be used:
@@ -124,7 +128,7 @@ For example, to set window properties, the following command may be used:
 
 ```json
 {
-  "type": 2,
+  "name": "setWindowProps",
   "args": {
     "title": "New Title",
     "maximize": true
@@ -132,23 +136,19 @@ For example, to set window properties, the following command may be used:
 }
 ```
 
-The response to a command is of the following form:
+The response to a command is an array of events of the following form:
 
 ```json
-{
-  "type": 1,
-  "args": {}
-}
+[
+    {
+      "name": "event name",
+      "args": {}
+    }
+]
 ```
 
-where `type` is defined as an enum:
+where `name` is defined as a type union:
 
 ```typescript
-export enum EventType {
-  Ok = 1,
-  Info = 2,
-  Error = 3,
-  InvalidCommand = 4,
-  WindowProps = 5,
-}
+export type EventName = 'ok' | 'info' | 'error' | 'error.command.invalid' | 'window.props' | 'exit';
 ```
