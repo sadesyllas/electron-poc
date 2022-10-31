@@ -1,3 +1,5 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
+
 import { contextBridge, ipcRenderer } from 'electron';
 
 ipcRenderer.on('input', (event, args) => {
@@ -5,7 +7,6 @@ ipcRenderer.on('input', (event, args) => {
 });
 
 contextBridge.exposeInMainWorld('electronAPI', {
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   onInput: (callback: any) => ipcRenderer.on('input', callback),
   onIOError: (callback: any) => {
     ipcRenderer.on('io.end', callback);

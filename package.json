@@ -6,7 +6,7 @@
   "scripts": {
     "lint": "npx eslint --fix src/**",
     "build": "tsc && copyfiles -f src/index.html build",
-    "lint:build": "tsc && copyfiles -f src/index.html build",
+    "lint:build": "npm run lint && tsc && copyfiles -f src/index.html build",
     "start": "electron build",
     "build:start": "npm run lint:build && npm start --",
     "test": "echo \"Error: no test specified\" && exit 1",

@@ -1,3 +1,5 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
+
 type OnInputCallback = (event: any, args: any) => void;
 type OnInputErrorCallback = (error?: Error) => void;
 

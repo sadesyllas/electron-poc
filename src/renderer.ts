@@ -1,3 +1,5 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
+
 const input = document.getElementById('input');
 
 window.electronAPI.onInput((event: any, args: any) => {
