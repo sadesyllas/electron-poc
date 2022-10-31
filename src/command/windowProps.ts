@@ -1,4 +1,4 @@
-import { CommandContext, CommandWindowProps, Event, EventType } from '../types';
+import { CommandContext, CommandWindowProps, Event } from '../types';
 
 export const getWindowProps = ({ window }: CommandContext): Event[] => {
   const props: unknown = {
@@ -14,7 +14,7 @@ export const getWindowProps = ({ window }: CommandContext): Event[] => {
     focused: window.isFocused(),
   };
 
-  return [{ type: EventType.WindowProps, args: props }];
+  return [{ name: 'window.props', args: props }];
 };
 
 export const setWindowProps = (props: CommandWindowProps, context: CommandContext): Event[] => {
@@ -30,6 +30,10 @@ export const setWindowProps = (props: CommandWindowProps, context: CommandContex
     opacity,
     show,
     title,
+    x,
+    y,
+    center,
+    animate,
   } = props;
 
   const { window } = context;
@@ -86,9 +90,17 @@ export const setWindowProps = (props: CommandWindowProps, context: CommandContex
     window.setOpacity(opacity);
   }
 
+  if (x !== undefined && y !== undefined) {
+    window.setPosition(x, y, animate);
+  }
+
+  if (center) {
+    window.center();
+  }
+
   if (focus) {
     window.focus();
   }
 
-  return [{ type: EventType.Ok }];
+  return [{ name: 'ok' }];
 };

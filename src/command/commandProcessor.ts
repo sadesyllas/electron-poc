@@ -1,4 +1,4 @@
-import { Command, CommandContext, CommandType, CommandWindowProps, Event, EventType } from '../types';
+import { Command, CommandContext, CommandWindowProps, Event } from '../types';
 import { getWindowProps, setWindowProps } from './windowProps';
 
 export const processCommand = (input: string, context: CommandContext): string => {
@@ -8,19 +8,23 @@ export const processCommand = (input: string, context: CommandContext): string =
   try {
     command = JSON.parse(input);
   } catch (error) {
-    result = [{ type: EventType.Error, args: error }];
+    result = [{ name: 'error', args: error }];
   }
 
   if (command) {
-    switch (command.type) {
-      case CommandType.GetWindowProps:
+    switch (command.name) {
+      case 'getWindowProps':
         result = getWindowProps(context);
         break;
-      case CommandType.SetWindowProps:
+      case 'setWindowProps':
         result = setWindowProps(<CommandWindowProps>command.args, context);
         break;
+      case 'exit':
+        context.exit();
+        result = [{ name: 'exit' }];
+        break;
       default:
-        result = [{ type: EventType.InvalidCommand }];
+        result = [{ name: 'error.command.invalid' }];
         break;
     }
   }
